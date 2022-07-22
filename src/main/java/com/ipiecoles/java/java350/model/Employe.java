@@ -1,5 +1,7 @@
 package com.ipiecoles.java.java350.model;
 
+import com.ipiecoles.java.java350.exception.EmployeException;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -63,18 +65,21 @@ public class Employe {
     }
 
     public Integer getNbRtt(LocalDate d){
-        int i1 = d.isLeapYear() ? 365 : 366;int var = 104;
+        int i1 = d.isLeapYear() ? 366 : 365;
+        int weekend = 104;
         switch (LocalDate.of(d.getYear(),1,1).getDayOfWeek()){
-            case THURSDAY: if(d.isLeapYear()) var =  var + 1; break;
+            case THURSDAY: if(d.isLeapYear()) weekend =  weekend + 1;
+                break;
             case FRIDAY:
-                if(d.isLeapYear()) var =  var + 2;
-                else var =  var + 1;
-            case SATURDAY:var = var + 1;
+                if(d.isLeapYear()) weekend =  weekend + 2;
+                else weekend =  weekend + 1;
+                break;
+            case SATURDAY:weekend = weekend + 1;
                 break;
         }
         int monInt = (int) Entreprise.joursFeries(d).stream().filter(localDate ->
                 localDate.getDayOfWeek().getValue() <= DayOfWeek.FRIDAY.getValue()).count();
-        return (int) Math.ceil((i1 - Entreprise.NB_JOURS_MAX_FORFAIT - var - Entreprise.NB_CONGES_BASE - monInt) * tempsPartiel);
+        return (int) Math.ceil((i1 - Entreprise.NB_JOURS_MAX_FORFAIT - weekend - Entreprise.NB_CONGES_BASE - monInt) * tempsPartiel);
     }
 
     /**
@@ -112,8 +117,16 @@ public class Employe {
         return prime * this.tempsPartiel;
     }
 
-    //Augmenter salaire
-    //public void augmenterSalaire(double pourcentage){}
+    //Augmenter salaire exception is good :D
+    public void augmenterSalaire(double pourcentage) throws EmployeException{
+        if(pourcentage <=0 ){
+            throw new EmployeException("the percentage you put is incorrect it should be more than zero");
+        }
+        else {
+            salaire = salaire *(1+pourcentage/100);
+        }
+
+    }
 
     public Long getId() {
         return id;
